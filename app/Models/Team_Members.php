@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Team_Members extends Model
 {
@@ -17,17 +18,17 @@ class Team_Members extends Model
         'specialization_id',
     ];
 
-    public function specialization()
+    public function specialization(): BelongsTo
     {
         return $this->belongsTo(specialization::class, 'specialization_id');
     }
 
-    public function team()
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class, 'team_id');
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'developer_id');
     }

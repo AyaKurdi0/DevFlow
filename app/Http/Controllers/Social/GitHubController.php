@@ -12,8 +12,15 @@ class GitHubController extends Controller
 {
     public function goToGithub()
     {
-        $url = Socialite::driver('github')->stateless()->redirect()->getTargetUrl();
-        return redirect($url);
+        try {
+            $url = Socialite::driver('github')->stateless()->redirect()->getTargetUrl();
+            return redirect($url);
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function handleGithubCallback()

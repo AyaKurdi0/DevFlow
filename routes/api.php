@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Developer\TaskDisplayingController;
+use App\Http\Controllers\Leader\ManageProjectController;
 use App\Http\Controllers\Leader\ManageTeamController;
 use App\Http\Controllers\Social\GitHubController;
 use Illuminate\Http\Request;
@@ -70,5 +72,24 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/leader/manageMember/addDeveloper',[ManageMemberController::class,'addDeveloper'])
         ->name('leader.manageMember.addDeveloper');
+
+    Route::get('/leader/manageMember/deleteDeveloper/{id}',[ManageMemberController::class,'removeDeveloper'])
+        ->name('leader.manageMember.removeDeveloper');
+
+    Route::post('/leader/manageMember/assignPermission/{id}',[ManageMemberController::class,'assignPermission'])
+        ->name('leader.manageMember.assignPermission');
+
+    Route::get('/leader/manageMember/unsignedPermission/{id}',[ManageMemberController::class,'unsignedPermission'])
+        ->name('leader.manageMember.unsignedPermission');
+
+    Route::post('/leader/manageProject/createProject',[ManageProjectController::class,'createNewProject'])
+        ->name('leader.manageProject.createProject');
 });
 
+
+//              #########################################################################
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/Developer/taskDisplaying/getDeveloperTasks',[TaskDisplayingController::class,'displayTask'])
+        ->name('Developer.taskDisplaying.getDeveloperTasks');
+});

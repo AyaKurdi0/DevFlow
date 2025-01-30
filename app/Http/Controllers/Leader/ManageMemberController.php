@@ -7,19 +7,22 @@ use App\Models\specialization;
 use App\Models\Team;
 use App\Models\Team_Members;
 use App\Models\User;
+use Exception;
+use http\Env\Response;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Auth;
 
 class ManageMemberController extends Controller
 {
+    //                        ------------- Manage Team Members -------------
 
     ####################### Add Developer By Team Leader To The Team #######################
-    public function addDeveloper(Request $request)
+    public function addDeveloper(Request $request): \Illuminate\Http\JsonResponse
     {
         $data = $request->validate([
             'name' => 'required|string',
@@ -38,9 +41,9 @@ class ManageMemberController extends Controller
             $developer->assignRole('developer');
 
             $leader = Auth::user();
-            $team = Team::where('user_id', $leader->id)->firstOrFail();
+            $team = (new \App\Models\Team)->where('user_id', $leader->id)->firstOrFail();
 
-            $specialization = Specialization::where('name', $data['specialization'])->firstOrFail();
+            $specialization = (new \App\Models\specialization)->where('name', $data['specialization'])->firstOrFail();
 
             $teamMember = Team_Members::create([
                 'team_id' => $team->id,
@@ -54,7 +57,7 @@ class ManageMemberController extends Controller
                 'message' => 'Developer created successfully.',
                 'team_member' => $teamMember,
             ], 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'message' => 'Failed to create developer.',
                 'error' => $e->getMessage(),
@@ -63,24 +66,151 @@ class ManageMemberController extends Controller
     }
 
 
+    ####################### Update Member Info By Leader #######################
+//    public function updateDeveloper(Request $request, $id)
+//    {
+//        try {
+//            $developer = User::findOrFail($id);
+//
+//            $validatedData = $request->validate([
+//                'name' => 'sometimes|required|string',
+//                'email' => 'sometimes|required|string|email|unique:users,email,' . $developer->id,
+//            ]);
+//
+//            $developer->update($validatedData);
+//
+//            return response()->json([
+//                'message' => 'Developer info updated successfully.',
+//                'developer' => $developer,
+//            ], 200);
+//        }catch (\Exception $e) {
+//            return response()->json([
+//                'message' => 'Failed to update developer.',
+//                'error' => $e->getMessage(),
+//            ]);
+//        }
+//    }
+
+
     ####################### Remove Member From Team By Leader #######################
-    public function removeDeveloper(Request $request)
+    public function removeDeveloper($id)
     {
-        
+        try {
+            $leader = Auth::user();
+            $team = Team::where('user_id', $leader->id)->firstOrFail();
+
+            $developer = User::findOrFail($id);
+            Team_Members::where('team_id', $team->id)
+                ->where('developer_id',$developer->id)
+                ->delete();
+
+            return response()->json([
+                'message' => 'Developer deleted successfully.',
+            ]);
+        }
+        catch (Exception $e) {
+            return response()->json([
+                'message' => 'Failed to delete developer.',
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
+
 
     ####################### Send Developer Credentials To His Email #######################
     public function sendCredentialsByEmail($developer , $password)
     {
-        Mail::send('email.new-developer-credentials', [
-            'name' => $developer->name,
-            'password' => $password,
-        ], function ($message) use ($developer) {
-            $message->to($developer->email);
-            $message->subject('Account credentials');
-        });
+        try {
+            Mail::send('email.new-developer-credentials', [
+                'name' => $developer->name,
+                'password' => $password,
+            ], function ($message) use ($developer) {
+                $message->to($developer->email);
+                $message->subject('Account credentials');
+            });
+
+            return  response()->json([
+                'message' => 'Credentials sent successfully.',
+            ]);
+        }catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
 
+
+    //                        ------------- Manage Team Permissions -------------
+
+    ####################### Assign Permission To Developer By Team Leader #######################
+    public function assignPermission(Request $request,$id)
+    {
+        $data = $request->validate([
+            'permission' => 'required|string|exists:permissions,name',
+        ]);
+        try {
+            $leader = Auth::user();
+            $team = Team::where('user_id', $leader->id)->firstOrFail();
+
+            $developer = User::whereHas('team_member', function ($query) use ($team) {
+                $query->where('team_id', $team->id);
+            })->findOrFail($id);
+
+            $permission = Permission::where('name', $data['permission'])->firstOrFail();
+            $developer->givePermissionTo($permission);
+
+            return response()->json([
+                'message' => 'Permission assigned successfully.',
+                'developer' => $developer,
+                'permission' => $permission,
+            ],200);
+        }
+        catch (Exception $e) {
+            return response()->json([
+                'message' => 'Failed to assign permission.',
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+
+    ####################### Unsigned Permission From Developer By Team Leader #######################
+    public function unsignedPermission(Request $request,$id)
+    {
+        $data = $request->validate([
+            'permission' => 'required|string|exists:permissions,name',
+        ]);
+        try {
+            $leader = Auth::user();
+            $team = Team::where('user_id', $leader->id)->firstOrFail();
+
+            $developer = User::whereHas('team_member', function ($query) use ($team) {
+                $query->where('team_id', $team->id);
+            })->findOrFail($id);
+
+            $permission = Permission::where('name', $data['permission'])->firstOrFail();
+
+            if (!$developer->hasPermissionTo($permission))
+            {
+                return response()->json([
+                    'message' => 'The developer does not have this permission.',
+                ], 400);
+            }
+
+            $developer->revokePermissionTo($permission);
+            return response()->json([
+                'message' => 'Permission removed successfully.',
+                'developer' => $developer,
+                'permission' => $permission->name,
+            ]);
+        }
+        catch (Exception $e) {
+            return response()->json([
+                'message' => 'Failed to remove permission.',
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
 
 }

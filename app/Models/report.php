@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class report extends Model
 {
@@ -20,16 +21,16 @@ class report extends Model
         'Report_time',
     ];
 
-    protected $date = [
+    protected array $date = [
         'Report_date',
     ];
 
-    public function task()
+    public function task(): BelongsTo
     {
         return $this->belongsTo(tasks::class, 'task_id');
     }
 
-    public function developer()
+    public function developer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'developer_id');
     }

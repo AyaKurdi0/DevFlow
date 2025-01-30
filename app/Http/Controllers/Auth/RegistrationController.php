@@ -13,6 +13,7 @@ use Spatie\Permission\Models\Role;
 
 class RegistrationController extends Controller
 {
+    ####################### Leader Registration #######################
     public function leaderRegister(Request $request){
         $data = $request->validate([
             'name' => 'required|string',
@@ -24,25 +25,35 @@ class RegistrationController extends Controller
             ],
         ]);
 
-        $leader = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        try {
+            $leader = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+            ]);
 
-        $role = Role::where('name', 'leader')->firstOrFail();
-        $leader->assignRole($role);
+            $role = Role::where('name', 'leader')->firstOrFail();
+            $leader->assignRole($role);
 
-        event(new Registered($leader));
-        
-        $token = $leader->createToken('LeaderToken')->plainTextToken;
+            event(new Registered($leader));
 
-        return response()->json([
-            'user' => $leader,
-            'token' => $token,
-        ]);
+            $token = $leader->createToken('LeaderToken')->plainTextToken;
+
+            return response()->json([
+                'user' => $leader,
+                'token' => $token,
+            ]);
+        }
+        catch (\Exception $exception){
+            return response()->json([
+                'message' => 'User Registration Failed',
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
+
+    ####################### User Login To System #######################
     public function login(Request $request){
 
         $credentials = $request->validate([
@@ -53,21 +64,29 @@ class RegistrationController extends Controller
             'remember' => 'boolean',
         ]);
 
-        $remember = $credentials['remember'] ?? false;
-        unset($credentials['remember']);
+        try {
+            $remember = $credentials['remember'] ?? false;
+            unset($credentials['remember']);
 
-        if (!Auth::attempt($credentials, $remember)) {
-            return response()->json([
-                'error' => 'the provided credentials are not correct',
-            ], 422);
+            if (!Auth::attempt($credentials, $remember)) {
+                return response()->json([
+                    'error' => 'the provided credentials are not correct',
+                ], 422);
+            }
+            $user = Auth::user();
+            $user->sendEmailVerificationNotification();
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+            return response([
+                'user'=>$user,
+                'token'=>$token,
+            ]);
         }
-        $user = Auth::user();
-        $user->sendEmailVerificationNotification();
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-        return response([
-            'user'=>$user,
-            'token'=>$token,
-        ]);
+        catch (\Exception $exception){
+            return response()->json([
+                'message' => 'Login Failed',
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 }

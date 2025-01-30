@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class review extends Model
 {
@@ -17,12 +18,12 @@ class review extends Model
         'comment',
     ];
 
-    public function task()
+    public function task(): BelongsTo
     {
         return $this->belongsTo(tasks::class, 'task_id');
     }
 
-    public function leader()
+    public function leader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'leader_id');
     }

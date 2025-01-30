@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -43,32 +46,32 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
     ];
 
-    public function team_member()
+    public function team_member(): HasMany
     {
         return $this->hasMany(Team_Members::class, 'developer_id');
     }
 
-    public function team()
+    public function team(): HasOne
     {
         return $this->hasOne(Team::class);
     }
 
-    public function document()
+    public function document(): HasMany
     {
         return $this->hasMany(documents::class);
     }
 
-    public function report()
+    public function report(): HasMany
     {
         return $this->hasMany(report::class);
     }
 
-    public function task()
+    public function task(): BelongsToMany
     {
         return $this->belongsToMany(tasks::class, 'user_task', 'developer_id', 'task_id');
     }
 
-    public function notification()
+    public function notification(): BelongsToMany
     {
         return $this->belongsToMany(Notifications::class, 'user_notification', 'receiver_id', 'notification_id');
     }

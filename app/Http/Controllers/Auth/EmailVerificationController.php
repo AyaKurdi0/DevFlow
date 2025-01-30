@@ -7,26 +7,57 @@ use Illuminate\Http\Request;
 
 class EmailVerificationController extends Controller
 {
+
+    ####################### Email Need To Being Verified #######################
     public function notice()
     {
-        return response()->json(['message' => 'Please verify your email address.'], 403);
+        try {
+            return response()->json([
+                'message' => 'Please verify your email address.'
+            ], 403);
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
+
+    ####################### Success Email Verify Process #######################
     public function verify(Request $request)
     {
-        $request->fulfill();
-        return response()->json(['message' => 'Email successfully verified.']);
+        try {
+            $request->fulfill();
+            return response()->json([
+                'message' => 'Email successfully verified.'
+            ]);
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
+
+    #######################  Email Verification Process #######################
     public function send(Request $request)
     {
-        $user = $request->user();
+        try {
+            $user = $request->user();
 
-        if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified.', 400]);
+            if ($user->hasVerifiedEmail()) {
+                return response()->json(['message' => 'Email already verified.', 400]);
+            }
+
+            $user->sendEmailVerificationNotification();
+            return back()->with('message', 'Verification link sent!');
         }
-
-        $user->sendEmailVerificationNotification();
-        return back()->with('message', 'Verification link sent!');
+        catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 }

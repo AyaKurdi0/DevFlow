@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class documents extends Model
 {
@@ -18,16 +19,16 @@ class documents extends Model
         'path',
     ];
 
-    protected $date = [
+    protected array $date = [
         'uploaded_date',
     ];
 
-    public function task()
+    public function task(): BelongsTo
     {
         return $this->belongsTo(tasks::class, 'task_id');
     }
 
-    public function developer()
+    public function developer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }
