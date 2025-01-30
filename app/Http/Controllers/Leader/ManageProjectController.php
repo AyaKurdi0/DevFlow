@@ -19,32 +19,25 @@ class ManageProjectController extends Controller
         $leader = Auth::user();
         $team = $leader->team()->firstOrFail();
 
-        if(!$team)
-        {
-            return response()->json([
-                'error' => 'Leader does not have a team.'
-            ], 403);
-        }
-
         $validate = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'string',
-            'due_date' => 'date',
+            'description' => 'nullable|string',
+            'due_date' => 'nullable|date',
             'priority' => 'integer|min:1|max:5'
         ]);
 
-        $project = (new projects)->create([
+        $project = Projects::create([
             'title' => $validate['title'],
-            'description' => $validate['description'],
+            'description' => $validate['description'] ?? '',
             'team_id' => $team->id,
-            'due_date' => $validate['due_date'],
+            'due_date' => $validate['due_date'] ?? null,
             'priority' => $validate['priority'],
         ]);
 
         return response()->json([
             'message' => 'Project created successfully',
             'project' => $project,
-        ]);
+        ], 201);
 
     }
 

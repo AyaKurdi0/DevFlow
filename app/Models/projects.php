@@ -15,6 +15,7 @@ class projects extends Model
         'title',
         'description',
         'team_id',
+        'due_date',
         'status',
         'priority',
     ];
