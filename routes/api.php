@@ -84,6 +84,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/leader/manageProject/createProject',[ManageProjectController::class,'createNewProject'])
         ->name('leader.manageProject.createProject');
+
+    Route::get('/leader/manageProject/startingProject/{id}',[ManageProjectController::class,'startImplementProject'])
+        ->name('leader.manageProject.startingProject');
+
+    Route::get('/leader/manageProject/completeProject/{id}',[ManageProjectController::class,'completeProject'])
+        ->name('leader.manageProject.completeProject');
 });
 
 

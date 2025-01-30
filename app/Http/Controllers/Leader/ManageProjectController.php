@@ -7,6 +7,7 @@ use App\Models\projects;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 
 class ManageProjectController extends Controller
 {
@@ -28,6 +29,7 @@ class ManageProjectController extends Controller
         $validate = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'string',
+            'due_date' => 'date',
             'priority' => 'integer|min:1|max:5'
         ]);
 
@@ -35,6 +37,7 @@ class ManageProjectController extends Controller
             'title' => $validate['title'],
             'description' => $validate['description'],
             'team_id' => $team->id,
+            'due_date' => $validate['due_date'],
             'priority' => $validate['priority'],
         ]);
 
@@ -48,6 +51,56 @@ class ManageProjectController extends Controller
     public function deleteProject($id)
     {
 
+    }
+
+    public function updateProject(Request $request, $id)
+    {
+
+    }
+
+
+    ####################### Start Implement Project By Leader #######################
+    public function startImplementProject($id): JsonResponse
+    {
+        $project = projects::findOrFail($id);
+
+        if($project->status !== 'stop')
+        {
+            return response()->json([
+                'error' => 'Project already in progress.'
+            ], 400);
+        }
+
+        $project->status = 'initial';
+        $project->start_date = Carbon::now();;
+        $project->save();
+
+        return response()->json([
+            'message' => 'Project started successfully',
+            'start_date' => $project->start_date,
+        ], 200);
+    }
+
+
+    public function completeProject($id): JsonResponse
+    {
+        $project = projects::findOrFail($id);
+
+        if($project->status === 'completed')
+        {
+            return response()->json([
+                'error' => 'Project already completed.'
+            ], 400);
+        }
+
+        $project->status = 'completed';
+        $project->end_date = Carbon::now();
+        $project->save();
+
+        return response()->json([
+            'message' => 'Project completed successfully',
+            'start_date' => $project->start_date,
+        ], 200);
     }
 
 }
