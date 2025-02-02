@@ -10,6 +10,7 @@ use App\Models\User;
 use Exception;
 use http\Env\Response;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -22,7 +23,7 @@ class ManageMemberController extends Controller
     //                        ------------- Manage Team Members -------------
 
     ####################### Add Developer By Team Leader To The Team #######################
-    public function addDeveloper(Request $request): \Illuminate\Http\JsonResponse
+    public function addDeveloper(Request $request): JsonResponse
     {
         $data = $request->validate([
             'name' => 'required|string',
@@ -41,9 +42,9 @@ class ManageMemberController extends Controller
             $developer->assignRole('developer');
 
             $leader = Auth::user();
-            $team = (new \App\Models\Team)->where('user_id', $leader->id)->firstOrFail();
+            $team = (new Team)->where('user_id', $leader->id)->firstOrFail();
 
-            $specialization = (new \App\Models\specialization)->where('name', $data['specialization'])->firstOrFail();
+            $specialization = (new specialization)->where('name', $data['specialization'])->firstOrFail();
 
             $teamMember = Team_Members::create([
                 'team_id' => $team->id,
@@ -93,7 +94,7 @@ class ManageMemberController extends Controller
 
 
     ####################### Remove Member From Team By Leader #######################
-    public function removeDeveloper($id)
+    public function removeDeveloper($id): JsonResponse
     {
         try {
             $leader = Auth::user();
@@ -118,7 +119,7 @@ class ManageMemberController extends Controller
 
 
     ####################### Send Developer Credentials To His Email #######################
-    public function sendCredentialsByEmail($developer , $password)
+    public function sendCredentialsByEmail($developer , $password): JsonResponse
     {
         try {
             Mail::send('email.new-developer-credentials', [
@@ -144,7 +145,7 @@ class ManageMemberController extends Controller
     //                        ------------- Manage Team Permissions -------------
 
     ####################### Assign Permission To Developer By Team Leader #######################
-    public function assignPermission(Request $request,$id)
+    public function assignPermission(Request $request,$id): JsonResponse
     {
         $data = $request->validate([
             'permission' => 'required|string|exists:permissions,name',
@@ -176,7 +177,7 @@ class ManageMemberController extends Controller
 
 
     ####################### Unsigned Permission From Developer By Team Leader #######################
-    public function unsignedPermission(Request $request,$id)
+    public function unsignedPermission(Request $request,$id): JsonResponse
     {
         $data = $request->validate([
             'permission' => 'required|string|exists:permissions,name',

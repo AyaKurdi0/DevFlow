@@ -88,8 +88,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/leader/manageProject/startingProject/{id}',[ManageProjectController::class,'startImplementProject'])
         ->name('leader.manageProject.startingProject');
 
-    Route::get('/leader/manageProject/completeProject/{id}',[ManageProjectController::class,'completeProject'])
+    Route::get('/leader/manageProject/completeProject/{id}',[ManageProjectController::class,'endImplementProject'])
         ->name('leader.manageProject.completeProject');
+
+    Route::get('/leader/manageProject/updateProject/{id}',[ManageProjectController::class,'updateProject'])
+        ->name('leader.manageProject.updateProject');
+
 });
 
 
