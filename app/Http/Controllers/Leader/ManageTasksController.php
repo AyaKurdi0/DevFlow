@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Leader;
 
 use App\Http\Controllers\Controller;
 use App\Models\tasks;
+use App\Models\User;
+use App\Models\user_task;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ManageTasksController extends Controller
 {
+
+    ####################### Create New Task By Leader #######################
     public function creatNewTask(Request $request, $projectId) :JsonResponse
     {
         $validate = $request->validate([
@@ -40,6 +44,7 @@ class ManageTasksController extends Controller
 //
 //    }
 
+    ####################### Delete Task By Leader #######################
     public function deleteTask($taskId) :JsonResponse
     {
         try {
@@ -57,4 +62,33 @@ class ManageTasksController extends Controller
             ]);
         }
     }
+
+
+    ####################### Assign Task To Developer By Leader #######################
+    public function assignTask(Request $request, $taskId) :JsonResponse
+    {
+        $validate = $request->validate([
+            'developer_id' => 'required|integer|exists:users,id',
+        ]);
+        try {
+            $developer = User::findOrFail($validate['developer_id']);
+
+            user_task::create([
+                'task_id' => $taskId,
+                'developer_id' => $developer->id,
+            ]);
+
+            return response()->json([
+                'message' => 'Task assigned successfully'
+            ], 201);
+        }
+        catch (Exception $exception)
+        {
+            return response()->json([
+                'message' => $exception->getMessage()
+            ]);
+        }
+    }
+
+
 }

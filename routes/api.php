@@ -100,6 +100,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/leader/manageTask/createTask/{id}', [ManageTasksController::class, 'creatNewTask'])
         ->name('leader.manageTask.createTask');
+
+    Route::post('/leader/manageTask/assignTask/{id}', [ManageTasksController::class, 'assignTask'])
+        ->name('leader.manageTask.assignTask');
 });
 
 
