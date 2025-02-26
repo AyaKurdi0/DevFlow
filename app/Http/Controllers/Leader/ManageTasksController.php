@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Leader;
 
 use App\Http\Controllers\Controller;
 use App\Models\tasks;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -38,4 +39,22 @@ class ManageTasksController extends Controller
 //    {
 //
 //    }
+
+    public function deleteTask($taskId) :JsonResponse
+    {
+        try {
+            $task = tasks::findOrFail($taskId);
+            $task->delete();
+
+            return response()->json([
+                'message' => 'Task deleted successfully'
+            ]);
+        }
+        catch (Exception $exception)
+        {
+            return response()->json([
+                'message' => $exception->getMessage()
+            ]);
+        }
+    }
 }

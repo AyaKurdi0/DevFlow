@@ -74,10 +74,9 @@ class ManageTeamController extends Controller
 
 
     ####################### Delete Team By Leader #######################
-    public function deleteTeam($id)
+    public function deleteTeam($id): JsonResponse
     {
         try {
-            $leader = Auth::user();
             $team = Team::find($id);
             $team->delete();
             return response()->json([

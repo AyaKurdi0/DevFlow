@@ -4,8 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Exception;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -14,7 +19,8 @@ use Spatie\Permission\Models\Role;
 class RegistrationController extends Controller
 {
     ####################### Leader Registration #######################
-    public function leaderRegister(Request $request){
+    public function leaderRegister(Request $request): JsonResponse
+    {
         $data = $request->validate([
             'name' => 'required|string',
             'email' => 'required|string|unique:users,email',
@@ -44,7 +50,7 @@ class RegistrationController extends Controller
                 'token' => $token,
             ]);
         }
-        catch (\Exception $exception){
+        catch (Exception $exception){
             return response()->json([
                 'message' => 'User Registration Failed',
                 'error' => $exception->getMessage(),
@@ -54,7 +60,8 @@ class RegistrationController extends Controller
 
 
     ####################### User Login To System #######################
-    public function login(Request $request){
+    public function login(Request $request): Response|JsonResponse|Application|ResponseFactory
+    {
 
         $credentials = $request->validate([
             'email' => 'required|email|string|exists:users,email',
@@ -82,7 +89,7 @@ class RegistrationController extends Controller
                 'token'=>$token,
             ]);
         }
-        catch (\Exception $exception){
+        catch (Exception $exception){
             return response()->json([
                 'message' => 'Login Failed',
                 'error' => $exception->getMessage(),
