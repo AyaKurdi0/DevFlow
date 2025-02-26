@@ -86,7 +86,7 @@ class ManageProjectController extends Controller
         }
 
         $project->status = 'in progress';
-        $project->start_date = Carbon::now();;
+        $project->start_date = Carbon::now();
         $project->save();
 
         return response()->json([

@@ -21,14 +21,12 @@ class tasks extends Model
         'actual_time_inDays',
         'project_id',
         'priority',
-    ];
-
-    protected array $date = [
         'estimated_end_date',
         'due_date',
         'start_date',
         'estimated_start_date',
     ];
+
 
     public function document(): HasMany
     {

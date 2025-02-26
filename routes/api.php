@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Developer\TaskDisplayingController;
 use App\Http\Controllers\Leader\ManageProjectController;
+use App\Http\Controllers\Leader\ManageTasksController;
 use App\Http\Controllers\Leader\ManageTeamController;
 use App\Http\Controllers\Social\GitHubController;
 use Illuminate\Http\Request;
@@ -96,9 +97,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/leader/manageProject/displayProjects',[ManageProjectController::class,'displayProjects'])
         ->name('leader.manageProject.displayProjects');
+
+    Route::post('/leader/manageTask/createTask/{id}', [ManageTasksController::class, 'creatNewTask'])
+        ->name('leader.manageTask.createTask');
 });
-
-
 
 
 //              #########################################################################

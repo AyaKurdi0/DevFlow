@@ -18,13 +18,10 @@ class projects extends Model
         'due_date',
         'status',
         'priority',
-    ];
-
-    protected array $date = [
         'start_date',
         'end_date',
     ];
-
+    
     public function task(): HasMany
     {
         return $this->hasMany(tasks::class);
