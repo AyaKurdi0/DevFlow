@@ -109,6 +109,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 //              #########################################################################
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/Developer/taskDisplaying/getDeveloperTasks',[TaskDisplayingController::class,'displayTask'])
+    Route::get('/Developer/taskDisplaying/getDeveloperTasks',[TaskDisplayingController::class,'displayTasks'])
         ->name('Developer.taskDisplaying.getDeveloperTasks');
 });

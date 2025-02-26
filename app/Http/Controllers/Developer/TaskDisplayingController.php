@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 
 class TaskDisplayingController extends Controller
 {
-    public function displayTask(): JsonResponse
+    public function displayTasks(): JsonResponse
     {
         $developer = Auth::user();
         $developer_task = $developer->task()->get();
