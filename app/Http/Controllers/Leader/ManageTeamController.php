@@ -5,17 +5,17 @@ namespace App\Http\Controllers\Leader;
 use App\Http\Controllers\Controller;
 use App\Models\Team;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ManageTeamController extends Controller
 {
     ####################### Create Team By Leader #######################
-    public function createTeam(Request $request): \Illuminate\Http\JsonResponse
+    public function createTeam(Request $request): JsonResponse
     {
         $data = $request->validate([
             'name' => 'required|string',
-            'Description' => 'nullable|string',
         ]);
 
         try {
@@ -29,7 +29,6 @@ class ManageTeamController extends Controller
 
             $team = Team::create([
                 'team_name' => $data['name'],
-                'Description' => $data['Description'],
                 'user_id' => $leader->id,
             ]);
 

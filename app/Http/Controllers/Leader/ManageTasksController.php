@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 
 class ManageTasksController extends Controller
 {
-//    public function creatNewTask(Request $request)
-//    {
-//
-//    }
+    public function creatNewTask(Request $request)
+    {
+        
+    }
 }

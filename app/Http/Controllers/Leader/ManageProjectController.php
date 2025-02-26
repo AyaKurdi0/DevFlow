@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use SebastianBergmann\CodeCoverage\Report\Xml\Project;
 
 class ManageProjectController extends Controller
 {
@@ -115,6 +116,18 @@ class ManageProjectController extends Controller
             'message' => 'Project completed successfully',
             'start_date' => $project->start_date,
         ], 200);
+    }
+
+
+    ####################### Display All Projects For Leader #######################
+    public function displayProjects(): JsonResponse
+    {
+        $leader = Auth::user();
+        $team = $leader->team()->firstOrFail();
+        $projects = Projects::Where('team_id', $team->id)->get();
+        return response()->json([
+            'projects' => $projects,
+        ]);
     }
 
 }
