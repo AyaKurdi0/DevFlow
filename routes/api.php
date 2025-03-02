@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Developer\TaskDisplayingController;
+use App\Http\Controllers\Developer\DeveloperTasksController;
 use App\Http\Controllers\Leader\ManageProjectController;
 use App\Http\Controllers\Leader\ManageTasksController;
 use App\Http\Controllers\Leader\ManageTeamController;
@@ -109,6 +109,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 //              #########################################################################
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/Developer/taskDisplaying/getDeveloperTasks',[TaskDisplayingController::class,'displayTasks'])
+    Route::get('/Developer/taskDisplaying/getDeveloperTasks',[DeveloperTasksController::class,'displayTasks'])
         ->name('Developer.taskDisplaying.getDeveloperTasks');
+
+    Route::get('/Developer/taskDisplaying/getTaskInfo/{id}',[DeveloperTasksController::class,'displayTaskInfo'])
+        ->name('Developer.taskDisplaying.getTaskInfo');
+
+    Route::get('/Developer/taskUpdating/updateTaskStatus/{id}',[DeveloperTasksController::class,'updateTaskStatus'])
+        ->name('Developer.taskUpdating.updateTaskStatus');
 });
