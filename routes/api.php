@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Developer\DeveloperTasksController;
+use App\Http\Controllers\Developer\DocumentsManageController;
 use App\Http\Controllers\Leader\ManageProjectController;
 use App\Http\Controllers\Leader\ManageTasksController;
 use App\Http\Controllers\Leader\ManageTeamController;
@@ -103,12 +104,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/leader/manageTask/assignTask/{id}', [ManageTasksController::class, 'assignTask'])
         ->name('leader.manageTask.assignTask');
+
+    Route::post('/leader/manageTask/deleteTask/{id}', [ManageTasksController::class, 'deleteTask'])
+        ->name('leader.manageTask.deleteTask');
+
+    Route::post('/leader/manageTask/unassignTask/{id}', [ManageTasksController::class, 'unassignTask'])
+        ->name('leader.manageTask.unassignTask');
 });
 
 
 //              #########################################################################
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(callback: function () {
     Route::get('/Developer/taskDisplaying/getDeveloperTasks',[DeveloperTasksController::class,'displayTasks'])
         ->name('Developer.taskDisplaying.getDeveloperTasks');
 
@@ -117,4 +124,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/Developer/taskUpdating/updateTaskStatus/{id}',[DeveloperTasksController::class,'updateTaskStatus'])
         ->name('Developer.taskUpdating.updateTaskStatus');
+
+    Route::post('/Developer/documentManage/uploadFile/{id}', [DocumentsManageController::class, 'uploadFiles'])
+        ->name('Developer.documentManage.uploadFile');
+
+    Route::get('/Developer/documentManage/downloadFile/{id}',[DocumentsManageController::class, 'downloadFile'])
+        ->name('Developer.documentManage.downloadFile');
 });

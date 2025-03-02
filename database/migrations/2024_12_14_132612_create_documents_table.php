@@ -20,7 +20,6 @@ class CreateDocumentsTable extends Migration
             $table->foreign('task_id')->references('id')->on('tasks');
             $table->foreign('uploaded_by')->references('id')->on('users');
             $table->string('title');
-            $table->text('description')->nullable();
             $table->string('document_type');
             $table->string('path');
             $table->date('uploaded_date');

@@ -14,14 +14,11 @@ class documents extends Model
         'task_id',
         'uploaded_by',
         'title',
-        'description',
         'document_type',
         'path',
-    ];
-
-    protected array $date = [
         'uploaded_date',
     ];
+
 
     public function task(): BelongsTo
     {

@@ -49,7 +49,12 @@ class ManageTasksController extends Controller
     {
         try {
             $task = tasks::findOrFail($taskId);
+            $userTasks = user_task::where('task_id', $taskId)->get();
+            foreach ($userTasks as $userTask) {
+                $userTask->delete();
+            }
             $task->delete();
+
 
             return response()->json([
                 'message' => 'Task deleted successfully'
@@ -90,5 +95,27 @@ class ManageTasksController extends Controller
         }
     }
 
+
+    ####################### Unassign Task from Developer By Leader #######################
+    public function unassignTask(Request $request, $taskId) :JsonResponse
+    {
+        $validate = $request->validate([
+            'developer_id' => 'required|integer|exists:users,id',
+        ]);
+        try {
+            $developer = User::findOrFail($validate['developer_id']);
+            user_task::where('task_id', $taskId)->where('developer_id', $developer->id)->delete();
+            return response()->json([
+                'message' => 'Task unassigned successfully'
+            ], 201);
+        }
+        catch (Exception $exception)
+        {
+            return response()->json([
+                'message' => $exception->getMessage()
+            ]);
+        }
+
+    }
 
 }
