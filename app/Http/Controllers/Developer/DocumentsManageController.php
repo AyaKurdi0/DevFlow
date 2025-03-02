@@ -55,18 +55,4 @@ class DocumentsManageController extends Controller
     }
 
 
-    ####################### Download File For Task By Any Members #######################
-    public function downloadFile($documentId): StreamedResponse|JsonResponse
-    {
-        try {
-            $document = documents::findOrFail($documentId);
-            return Storage::download('public/' . $document->path, $document->title);
-        }
-        catch (Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ]);
-        }
-    }
-
 }
