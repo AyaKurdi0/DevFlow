@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Leader;
 
 use App\Http\Controllers\Controller;
+use App\Models\review;
 use App\Models\tasks;
 use App\Models\User;
 use App\Models\user_task;
+use Auth;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +18,7 @@ class ManageTasksController extends Controller
     ####################### Create New Task By Leader #######################
     public function creatNewTask(Request $request, $projectId) :JsonResponse
     {
+
         $validate = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -23,6 +26,8 @@ class ManageTasksController extends Controller
             'due_date' => 'required|date',
             'priority' => 'required|integer|between:1,5',
         ]);
+
+        $leader = Auth::user();
 
         $task = (new tasks)->create([
             'title' => $validate['title'],
@@ -33,9 +38,15 @@ class ManageTasksController extends Controller
             'priority' => $validate['priority'],
         ]);
 
+        $taskReview = (new review)->create([
+            'task_id' => $task->id,
+            'leader_id' => $leader->id,
+        ]);
+
         return response()->json([
             'message' => 'Task created successfully',
-            'task' => $task
+            'task' => $task,
+            'review' => $taskReview
         ],201);
     }
 
@@ -53,6 +64,12 @@ class ManageTasksController extends Controller
             foreach ($userTasks as $userTask) {
                 $userTask->delete();
             }
+
+            $taskReviews = review::where('task_id', $taskId)->get();
+            foreach ($taskReviews as $taskReview) {
+                $taskReview->delete();
+            }
+
             $task->delete();
 
 
@@ -116,6 +133,23 @@ class ManageTasksController extends Controller
             ]);
         }
 
+    }
+
+
+    public function displayTaskInfo($taskId) :JsonResponse
+    {
+        try {
+            $task = tasks::findOrFail($taskId);
+            return response()->json([
+                'task' => $task
+            ], 201);
+        }
+        catch (Exception $exception)
+        {
+            return response()->json([
+                'message' => $exception->getMessage()
+            ]);
+        }
     }
 
 }

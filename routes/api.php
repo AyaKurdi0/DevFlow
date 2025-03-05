@@ -3,6 +3,7 @@
 use App\Http\Controllers\Developer\DeveloperTasksController;
 use App\Http\Controllers\Developer\DocumentsManageController;
 use App\Http\Controllers\Leader\ManageProjectController;
+use App\Http\Controllers\Leader\ManageReviewsController;
 use App\Http\Controllers\Leader\ManageTasksController;
 use App\Http\Controllers\Leader\ManageTeamController;
 use App\Http\Controllers\Social\GitHubController;
@@ -110,6 +111,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/leader/manageTask/unassignTask/{id}', [ManageTasksController::class, 'unassignTask'])
         ->name('leader.manageTask.unassignTask');
+
+    Route::get('/leader/manageTask/displayTasks/{id}',[ManageTasksController::class,'displayTaskInfo'])
+        ->name('leader.manageTask.displayTasks');
+
+    Route::post('/leader/manageReview/approveTask/{id}', [ManageReviewsController::class, 'approveTask'])
+        ->name('leader.manageTask.approveTask');
+
+    Route::post('/leader/manageReview/rejectTask/{id}', [ManageReviewsController::class, 'rejectTask'])
+        ->name('leader.manageTask.rejectTask');
+
+    Route::post('/leader/manageReview/addComment/{id}', [ManageReviewsController::class, 'addComment'])
+        ->name('leader.manageReview.addComment');
 });
 
 

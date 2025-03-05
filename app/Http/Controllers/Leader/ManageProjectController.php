@@ -50,10 +50,11 @@ class ManageProjectController extends Controller
 
     }
 
-    public function deleteProject($id)
-    {
-
-    }
+//    public function deleteProject($projectId)
+//    {
+//        $project = projects::findOrFail($projectId);
+//
+//    }
 
 
     ####################### Update Project Information By Leader #######################

@@ -15,6 +15,7 @@ class review extends Model
     protected $fillable = [
         'task_id',
         'leader_id',
+        'status',
         'comment',
     ];
 
