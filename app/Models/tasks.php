@@ -47,4 +47,9 @@ class tasks extends Model
     {
         return $this->belongsTo(projects::class, 'project_id');
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(review::class, 'task_id');
+    }
 }

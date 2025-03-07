@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Developer\DeveloperReviewsController;
 use App\Http\Controllers\Developer\DeveloperTasksController;
 use App\Http\Controllers\Developer\DocumentsManageController;
 use App\Http\Controllers\Leader\ManageProjectController;
@@ -157,4 +158,13 @@ Route::middleware(['auth:sanctum'])->group(callback: function () {
 
     Route::get('/Developer/documentManage/downloadFile/{id}',[DocumentsManageController::class, 'downloadFile'])
         ->name('Developer.documentManage.downloadFile');
+
+    Route::get('/Developer/reviewDisplaying/getDeveloperReviews',[DeveloperReviewsController::class,'displayAllReview'])
+        ->name('Developer.reviewDisplaying.getDeveloperReviews');
+
+    Route::get('/Developer/reviewDisplaying/getApprovedReviews',[DeveloperReviewsController::class,'displayApprovedReviews'])
+        ->name('Developer.reviewDisplaying.getApprovedReviews');
+
+    Route::get('/Developer/reviewDisplaying/getRejectedReviews',[DeveloperReviewsController::class,'displayRejectedReviews'])
+        ->name('Developer.reviewDisplaying.getRejectedReviews');
 });
