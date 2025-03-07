@@ -7,6 +7,7 @@ use App\Models\review;
 use App\Models\tasks;
 use App\Models\User;
 use App\Models\user_task;
+use App\Notifications\NewTaskAssigned;
 use Auth;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -99,6 +100,9 @@ class ManageTasksController extends Controller
                 'task_id' => $taskId,
                 'developer_id' => $developer->id,
             ]);
+
+            $task = tasks::findOrFail($taskId);
+            $developer->notify(new NewTaskAssigned($task));
 
             return response()->json([
                 'message' => 'Task assigned successfully'

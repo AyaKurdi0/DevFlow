@@ -123,6 +123,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/leader/manageReview/addComment/{id}', [ManageReviewsController::class, 'addComment'])
         ->name('leader.manageReview.addComment');
+
+    Route::get('/leader/manageReview/displayAllReview', [ManageReviewsController::class, 'displayAllTasksToReview'])
+        ->name('leader.manageReview.displayReview');
+
+    Route::get('/leader/manageReview/displayUnreviewedTasks', [ManageReviewsController::class, 'displayUnreviewedTasks'])
+        ->name('leader.manageReview.displayUnreviewedTasks');
+
+    Route::get('/leader/manageReview/displayApprovedTasks', [ManageReviewsController::class, 'displayApprovedTasks'])
+        ->name('leader.manageReview.displayApprovedTasks');
+
+    Route::get('/leader/manageReview/displayRejectedTasks', [ManageReviewsController::class, 'displayRejectedTasks'])
+        ->name('leader.manageReview.displayRejectedTasks');
+
+
 });
 
 
