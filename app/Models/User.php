@@ -71,9 +71,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(tasks::class, 'user_tasks', 'developer_id', 'task_id');
     }
 
-    public function notification(): BelongsToMany
+//    public function notification(): BelongsToMany
+//    {
+//        return $this->belongsToMany(Notifications::class, 'user_notification', 'receiver_id', 'notification_id');
+//    }
+
+    public function githubAccount(): HasOne
     {
-        return $this->belongsToMany(Notifications::class, 'user_notification', 'receiver_id', 'notification_id');
+        return $this->hasOne(GitHubAccount::class);
     }
 
 //    public function review(): HasMany

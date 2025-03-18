@@ -15,7 +15,6 @@ class report extends Model
     protected $fillable = [
         'task_id',
         'title',
-        'description',
         'developer_id',
         'content',
         'Report_time',

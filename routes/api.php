@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Connection\ChatController;
 use App\Http\Controllers\Developer\DeveloperReviewsController;
 use App\Http\Controllers\Developer\DeveloperTasksController;
 use App\Http\Controllers\Developer\DocumentsManageController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\Leader\ManageProjectController;
 use App\Http\Controllers\Leader\ManageReviewsController;
 use App\Http\Controllers\Leader\ManageTasksController;
 use App\Http\Controllers\Leader\ManageTeamController;
+use App\Http\Controllers\Services\GitHubServicesController;
 use App\Http\Controllers\Social\GitHubController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -48,11 +50,12 @@ Route::post('/email/verification-notification', [EmailVerificationController::cl
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
 
-Route::get('/auth/github', [GitHubController::class, 'goToGithub'])
-    ->name('social.redirect');
+Route::get('/auth/github', [GitHubController::class, 'redirectToGitHub']);
+Route::get('/auth/github/callback', [GitHubController::class, 'handleGitHubCallback']);
 
-Route::get('/auth/callback', [GitHubController::class, 'handleGithubCallback'])
-    ->name('/auth/github/callback');
+
+//Route::get('/github/login', [GitHubController::class, 'goToGithub']);
+//Route::get('/github/callback', [GitHubController::class, 'handleGitHubCallback']);
 
 //Route::post('/leader/manageMember/addDeveloper',[ManageMemberController::class,'addDeveloper'])
 //    ->middleware('permission:add team member')
@@ -167,4 +170,24 @@ Route::middleware(['auth:sanctum'])->group(callback: function () {
 
     Route::get('/Developer/reviewDisplaying/getRejectedReviews',[DeveloperReviewsController::class,'displayRejectedReviews'])
         ->name('Developer.reviewDisplaying.getRejectedReviews');
+});
+
+
+
+
+Route::middleware('auth:sanctum')->group(function() {
+
+    Route::post('/Chat/sendMessage', [ChatController::class, 'sendMessage'])
+        ->name('Chat.sendMessage');
+
+    Route::get('/Chat/getMessages', [ChatController::class, 'getMessages'])
+        ->name('Chat.getMessages');
+});
+
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/github/profile', [GitHubServicesController::class, 'getUserProfile']);
+    Route::get('/github/repositories', [GitHubServicesController::class, 'getUserRepositories']);
+    Route::post('/github/connect', [GitHubServicesController::class, 'connectGitHub'])->name('github.connect');
 });
