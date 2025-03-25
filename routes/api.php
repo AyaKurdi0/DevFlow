@@ -175,16 +175,18 @@ Route::middleware(['auth:sanctum'])->group(callback: function () {
 
 
 
-Route::middleware('auth:sanctum')->group(function() {
+//Route::middleware('auth:sanctum')->group(function() {
+//
+//    Route::post('/Chat/sendMessage', [ChatController::class, 'sendMessage'])
+//        ->name('Chat.sendMessage');
+//
+//    Route::get('/Chat/getMessages', [ChatController::class, 'getMessages'])
+//        ->name('Chat.getMessages');
+//});
 
-    Route::post('/Chat/sendMessage', [ChatController::class, 'sendMessage'])
-        ->name('Chat.sendMessage');
-
-    Route::get('/Chat/getMessages', [ChatController::class, 'getMessages'])
-        ->name('Chat.getMessages');
-});
-
-
+Route::post('/sender-team-message' , [ChatController::class, 'sendMessage'])
+    ->name('sender-team-message')
+    ->middleware('auth');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/github/profile', [GitHubServicesController::class, 'getUserProfile']);

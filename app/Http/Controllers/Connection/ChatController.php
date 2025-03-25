@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Connection;
 
 use App\Events\MessageSent;
+use App\Events\TeamMessageSent;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\Team;
@@ -20,17 +21,29 @@ class ChatController extends Controller
         ]);
 
         try {
+            $sender = Auth::user();
+            if (!$sender) {
+                return response()->json([
+                    'status' => 'Error',
+                    'message' => 'User is not authenticated',
+                ], 401);
+            }
 
-            $senderId = Auth::user();
-            $team = $senderId->team->get()->first();
+            $team = $sender->team()->first();
+            if (!$team) {
+                return response()->json([
+                    'status' => 'Error',
+                    'message' => 'User is not in a team',
+                ], 400);
+            }
 
             $message = Message::create([
-                'sender_id' => $senderId->id,
+                'sender_id' => $sender->id,
                 'team_id' => $team->id,
                 'message' => $data['message'],
             ]);
-
-            broadcast(new MessageSent($message, $senderId, $team))->toOthers();
+            
+            broadcast(new TeamMessageSent($message, $sender))->toOthers();
 
             return response()->json([
                 'status' => 'Message sent successfully',
@@ -41,7 +54,7 @@ class ChatController extends Controller
             return response()->json([
                 'status' => 'Error sending message',
                 'message' => $e->getMessage(),
-            ]);
+            ], 500);
         }
     }
 

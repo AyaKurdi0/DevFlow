@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Models\Message;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -11,24 +10,16 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MessageSent implements ShouldBroadcast
+class TeamMessageSent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * Create a new event instance.
-     *
-     * @return void
-     */
     public $message;
     public $sender;
-    public $teamId;
-
-    public function __construct($message, $sender,$teamId)
+    public function __construct($message, $sender)
     {
         $this->message = $message;
         $this->sender = $sender;
-        $this->teamId = $teamId;
     }
 
     /**
@@ -38,6 +29,11 @@ class MessageSent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('team.' . $this->teamId);
+        return new PrivateChannel('team.' . $this->sender->team_id);
+    }
+
+    public function broadcastAs()
+    {
+        return 'team-message';
     }
 }
