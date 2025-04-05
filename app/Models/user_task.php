@@ -15,4 +15,5 @@ class user_task extends Model
         'task_id',
         'developer_id',
     ];
+
 }

@@ -41,6 +41,7 @@ class RegistrationController extends Controller
             $role = Role::where('name', 'leader')->firstOrFail();
             $leader->assignRole($role);
 
+            $leader->sendEmailVerificationNotification();
             event(new Registered($leader));
 
             $token = $leader->createToken('LeaderToken')->plainTextToken;
@@ -59,7 +60,7 @@ class RegistrationController extends Controller
     }
 
 
-    ####################### User Login To System #######################
+    ####################### User Login To The System #######################
     public function login(Request $request): Response|JsonResponse|Application|ResponseFactory
     {
 
@@ -83,9 +84,12 @@ class RegistrationController extends Controller
             $user = Auth::user();
             $user->sendEmailVerificationNotification();
 
+            $role = $user->getRoleNames()->first();
             $token = $user->createToken('auth_token')->plainTextToken;
+
             return response([
                 'user'=>$user,
+                'role_name'=>$role,
                 'token'=>$token,
             ]);
         }
@@ -93,6 +97,34 @@ class RegistrationController extends Controller
             return response()->json([
                 'message' => 'Login Failed',
                 'error' => $exception->getMessage(),
+            ]);
+        }
+    }
+
+
+    ####################### User Logout From The System #######################
+    public function logout(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'No authenticated user found',
+                'success' => false,
+            ], 401);
+        }
+
+        try {
+            $request->user()->currentAccessToken()->delete();
+
+            return response()->json([
+                'message' => 'Logged out successfully',
+                'success' => true,
+            ], 200);
+        }
+        catch (Exception $exception){
+            return response()->json([
+                'message' => $exception->getMessage(),
             ]);
         }
     }

@@ -11,10 +11,11 @@
         "guzzlehttp/guzzle": "^7.9",
         "knplabs/github-api": "^3.16",
         "laravel/framework": "^9.0",
-        "laravel/sanctum": "^2.14",
-        "laravel/socialite": "^5.16",
+        "laravel/sanctum": "^3.3",
+        "laravel/socialite": "^5.18",
         "laravel/tinker": "^2.7",
-        "pusher/pusher-php-server": "7.2",
+        "predis/predis": "^2.3",
+        "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-permission": "^6.10"
     },
     "require-dev": {

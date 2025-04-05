@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
-
+use Spatie\Permission\Models\Permission;
 class RoleSeeder extends Seeder
 {
     /**
@@ -15,44 +15,50 @@ class RoleSeeder extends Seeder
      */
     public function run()
     {
-//        $leader = Role::create(['name' => 'leader']);
-//        $developer = Role::create(['name' => 'developer']);
-//        $admin = Role::create(['name' => 'admin']);
-//        $manager = Role::create(['name' => 'manager']);
+        // Create roles
+        $leader = Role::create(['name' => 'leader']);
+        $developer = Role::create(['name' => 'developer']);
+        $admin = Role::create(['name' => 'admin']);
 
-
+        // Leader Permissions
         $leaderPermissions = [
+            'create team',
+            'delete team',
             'add team member',
             'remove team member',
-            'manage member permissions',
-            'add project tasks',
-            'manage project tasks',
-            'view project dashboard',
-            'review submitted tasks',
-            'add task comments',
-            'reassign tasks',
-            'assign tasks',
-            'view project stats',
-            'reassign project stats',
-            'monitor deployment',
-            'view team performance reports',
-            'send notification',
+            'assign member permissions',
+            'revoke member permissions',
+            'create project',
+            'start project',
+            'complete project',
+            'update project',
+            'delete project',
+            'create task',
+            'assign task',
+            'unassign task',
+            'delete task',
+            'download task files',
+            'approve task',
+            'reject task',
+            'add comment on task review',
         ];
 
         $developerPermissions = [
-            'view own tasks',
             'update task status',
-            'push code to repository',
-            'upload documents',
-            'submit task report',
-            'view code reviews',
-            'view completed tasks summary',
-            'view task comments',
+            'upload task files',
+            'add report',
         ];
 
-        $leaderRoles = Role::create(['name' => 'leader']);
-        $leaderRoles->givePermissionTo($leaderPermissions);
-        $developerRoles = Role::create(['name' => 'developer']);
-        $developerRoles->givePermissionTo($developerPermissions);
+        // Admin gets all permissions
+        $adminPermissions = Permission::pluck('name')->toArray();
+
+        // Assign permissions to roles
+        $leader->givePermissionTo($leaderPermissions);
+        $developer->givePermissionTo($developerPermissions);
+        $admin->givePermissionTo($adminPermissions);
+
+        // Additional roles if needed
+        // $manager = Role::create(['name' => 'manager']);
+        // $manager->givePermissionTo([...]);
     }
 }

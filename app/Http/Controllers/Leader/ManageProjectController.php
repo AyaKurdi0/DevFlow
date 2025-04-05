@@ -27,7 +27,20 @@ class ManageProjectController extends Controller
 
         try {
             $leader = Auth::user();
-            $team = $leader->team()->firstOrFail();
+
+            if (!$leader)
+            {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            if (!($leader->can('create project')))
+            {
+                return response()->json([
+                    'massage' => 'Forbidden access.'
+                ]);
+            }
+
+            $team = $leader->ownedTeam()->firstOrFail();
 
             $project = Projects::create([
                 'title' => $validate['title'],
@@ -50,35 +63,34 @@ class ManageProjectController extends Controller
 
     }
 
-//    public function deleteProject($projectId)
-//    {
-//        $project = projects::findOrFail($projectId);
-//
-//    }
 
-
-    ####################### Update Project Information By Leader #######################
-    public function updateProject(Request $request, $id): JsonResponse
+    ####################### Delete Existing Project By Leader #######################
+    public function deleteProject($projectId) :JsonResponse
     {
-        $validate = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'due_date' => 'nullable|date',
-            'priority' => 'integer|min:1|max:5'
-        ]);
-
         try {
-            $project = Projects::findOrFail($id);
-            $project->update([
-                'title' => $validate['title'],
-                'description' => $validate['description'] ?? '',
-                'due_date' => $validate['due_date'] ?? null,
-                'priority' => $validate['priority'],
-            ]);
+            $leader = Auth::user();
 
+            if (!$leader)
+            {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            if (!($leader->can('delete project')))
+            {
+                return response()->json([
+                    'massage' => 'Forbidden access.'
+                ]);
+            }
+
+            $project = projects::findOrFail($projectId);
+            $tasks = $project->tasks()->get();
+
+            foreach ($tasks as $task) {
+                $task->delete();
+            }
+            $project->delete();
             return response()->json([
-                'message' => 'Project updated successfully',
-                'project' => $project,
+                'message' => 'Project deleted successfully',
             ]);
         }
         catch (Exception $e) {
@@ -93,6 +105,19 @@ class ManageProjectController extends Controller
     public function startImplementProject($id): JsonResponse
     {
         try {
+            $leader = Auth::user();
+
+            if (!$leader)
+            {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            if (!($leader->can('start project')))
+            {
+                return response()->json([
+                    'massage' => 'Forbidden access.'
+                ]);
+            }
             $project = projects::findOrFail($id);
 
             if($project->status !== 'initial')
@@ -123,6 +148,18 @@ class ManageProjectController extends Controller
     public function endImplementProject($id): JsonResponse
     {
         try {
+            $leader = Auth::user();
+            if (!$leader)
+            {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            if (!($leader->can('complete project')))
+            {
+                return response()->json([
+                    'massage' => 'Forbidden access.'
+                ]);
+            }
             $project = projects::findOrFail($id);
 
             if($project->status === 'completed')
@@ -149,16 +186,64 @@ class ManageProjectController extends Controller
     }
 
 
-    ####################### Display All Projects For Leader #######################
+    ####################### Display All Projects To Leader #######################
     public function displayProjects(): JsonResponse
     {
         try {
             $leader = Auth::user();
-            $team = $leader->team()->firstOrFail();
+            $team = $leader->ownedTeam()->firstOrFail();
             $projects = Projects::Where('team_id', $team->id)->get();
             return response()->json([
                 'projects' => $projects,
             ]);
+        }
+        catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+
+    ####################### Display Project Information To Leader #######################
+    public function displayProjectInfo($projectId): JsonResponse
+    {
+        try{
+            $project = projects::findOrFail($projectId);
+            return response()->json([
+                'project' => $project,
+            ],201);
+        }
+        catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+
+    ####################### Display Newest Three Projects To Leader #######################
+    public function displayNewestProjects(): JsonResponse
+    {
+        try {
+            $leader = Auth::user();
+            if (!$leader) {
+                return response()->json([
+                    'message' => 'No authenticated user found',
+                    'success' => false
+                ], 401);
+            }
+            $team = $leader->ownedTeam()->firstOrFail();
+            $projects = Projects::Where('team_id', $team->id)
+                ->latest()
+                ->take(3)
+                ->get();
+
+            return response()->json([
+                'projects' => $projects,
+                'message' => 'Latest projects retrieved successfully',
+                'success' => true
+            ], 200);
         }
         catch (Exception $e) {
             return response()->json([

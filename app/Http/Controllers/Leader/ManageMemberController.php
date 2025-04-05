@@ -32,6 +32,18 @@ class ManageMemberController extends Controller
         ]);
 
         try {
+            $leader = Auth::user();
+            if (!$leader)
+            {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            if (!($leader->can('add team member')))
+            {
+                return response()->json([
+                    'massage' => 'Forbidden access.'
+                ]);
+            }
             $randomPassword = Str::random(9);
             $developer = User::create([
                 'name' => $data['name'],
@@ -40,8 +52,6 @@ class ManageMemberController extends Controller
             ]);
 
             $developer->assignRole('developer');
-
-            $leader = Auth::user();
             $team = (new Team)->where('user_id', $leader->id)->firstOrFail();
 
             $specialization = (new specialization)->where('name', $data['specialization'])->firstOrFail();
@@ -67,37 +77,23 @@ class ManageMemberController extends Controller
     }
 
 
-    ####################### Update Member Info By Leader #######################
-//    public function updateDeveloper(Request $request, $id)
-//    {
-//        try {
-//            $developer = User::findOrFail($id);
-//
-//            $validatedData = $request->validate([
-//                'name' => 'sometimes|required|string',
-//                'email' => 'sometimes|required|string|email|unique:users,email,' . $developer->id,
-//            ]);
-//
-//            $developer->update($validatedData);
-//
-//            return response()->json([
-//                'message' => 'Developer info updated successfully.',
-//                'developer' => $developer,
-//            ], 200);
-//        }catch (\Exception $e) {
-//            return response()->json([
-//                'message' => 'Failed to update developer.',
-//                'error' => $e->getMessage(),
-//            ]);
-//        }
-//    }
-
-
     ####################### Remove Member From Team By Leader #######################
     public function removeDeveloper($id): JsonResponse
     {
         try {
             $leader = Auth::user();
+
+            if (!$leader)
+            {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            if (!($leader->can('remove team member')))
+            {
+                return response()->json([
+                    'massage' => 'Forbidden access.'
+                ]);
+            }
             $team = Team::where('user_id', $leader->id)->firstOrFail();
 
             $developer = User::findOrFail($id);
@@ -152,6 +148,19 @@ class ManageMemberController extends Controller
         ]);
         try {
             $leader = Auth::user();
+
+            if (!$leader)
+            {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            if (!($leader->can('assign member permissions')))
+            {
+                return response()->json([
+                    'massage' => 'Forbidden access.'
+                ]);
+            }
+
             $team = Team::where('user_id', $leader->id)->firstOrFail();
 
             $developer = User::whereHas('team_member', function ($query) use ($team) {
@@ -184,6 +193,19 @@ class ManageMemberController extends Controller
         ]);
         try {
             $leader = Auth::user();
+
+            if (!$leader)
+            {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            if (!($leader->can('revoke member permissions')))
+            {
+                return response()->json([
+                    'massage' => 'Forbidden access.'
+                ]);
+            }
+
             $team = Team::where('user_id', $leader->id)->firstOrFail();
 
             $developer = User::whereHas('team_member', function ($query) use ($team) {
@@ -210,6 +232,27 @@ class ManageMemberController extends Controller
             return response()->json([
                 'message' => 'Failed to remove permission.',
                 'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+
+    ####################### Display Team Member To Leader #######################
+    public function displayTeamMembersToLeader(): JsonResponse
+    {
+        try {
+            $leader = Auth::user();
+            $team = $leader->ownedTeam()->firstOrFail();
+
+            $teamMembers = $team->members()->get();
+            return response()->json([
+                'leader' => $leader,
+                'teamMembers' => $teamMembers,
+            ]);
+        }
+        catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
             ]);
         }
     }

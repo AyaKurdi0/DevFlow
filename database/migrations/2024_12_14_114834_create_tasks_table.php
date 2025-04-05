@@ -19,12 +19,12 @@ class CreateTasksTable extends Migration
             $table->string('type');
             $table->text('description');
             $table->enum('status',['To Do','Doing','Done'])->default('To Do');
-            $table->date('estimated_end_date');
-            $table->date('due_date');   
-            $table->date('start_date');
-            $table->date('estimated_start_date');
-            $table->integer('estimated_time_inDays');
-            $table->integer('actual_time_inDays');
+            $table->date('estimated_end_date')->nullable();
+            $table->date('due_date')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('estimated_start_date')->nullable();
+            $table->integer('estimated_time_inDays')->nullable();
+            $table->integer('actual_time_inDays')->nullable();
             $table->unsignedBigInteger('project_id');
             $table->foreign('project_id')->references('id')->on('projects');
             $table->enum('priority',[1,2,3,4,5])->default(3);

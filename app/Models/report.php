@@ -16,8 +16,10 @@ class report extends Model
         'task_id',
         'title',
         'developer_id',
-        'content',
-        'Report_time',
+        'details',
+        'challenges',
+        'result',
+        'Report_date_time',
     ];
 
     protected array $date = [

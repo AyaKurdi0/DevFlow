@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateReportsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('reports', function (Blueprint $table) {
@@ -18,21 +13,15 @@ class CreateReportsTable extends Migration
             $table->unsignedBigInteger('task_id');
             $table->foreign('task_id')->references('id')->on('tasks');
             $table->string('title');
-            $table->text('description')->nullable();
+            $table->longText('details')->nullable();
             $table->unsignedBigInteger('developer_id');
             $table->foreign('developer_id')->references('id')->on('users');
-            $table->longText('content');
-            $table->date('Report_date');
-            $table->time('Report_time');
+            $table->longText('challenges')->nullable();
+            $table->longText('result')->nullable();
+            $table->dateTime('Report_date_time')->nullable();
             $table->timestamps();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('reports');

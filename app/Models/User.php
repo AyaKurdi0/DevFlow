@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -46,15 +47,16 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
     ];
 
-    public function team_member(): HasMany
+    public function ownedTeam() :HasOne
     {
-        return $this->hasMany(Team_Members::class, 'developer_id');
+        return $this->hasOne(Team::class, 'user_id');
     }
 
-    public function team(): HasOne
+    public function teams() : BelongsToMany
     {
-        return $this->hasOne(Team::class);
+        return $this->belongsToMany(Team::class, 'team__members', 'developer_id', 'team_id');
     }
+
 
     public function document(): HasMany
     {
@@ -71,18 +73,27 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(tasks::class, 'user_tasks', 'developer_id', 'task_id');
     }
 
-//    public function notification(): BelongsToMany
-//    {
-//        return $this->belongsToMany(Notifications::class, 'user_notification', 'receiver_id', 'notification_id');
-//    }
-
-    public function githubAccount(): HasOne
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(Notification::class, 'notifiable');
+    }
+    public function githubAccount() : hasOne
     {
         return $this->hasOne(GitHubAccount::class);
     }
 
-//    public function review(): HasMany
-//    {
-//        return $this->hasMany(review::class);
-//    }
+    public function hasGithubAccount() : bool
+    {
+        return $this->githubAccount()->exists();
+    }
+
+    public function getGithubInfo()
+    {
+        return $this->githubAccount ? $this->githubAccount->getBasicInfo() : null;
+    }
+
+    public function messages() : HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
 }

@@ -22,9 +22,9 @@ class projects extends Model
         'end_date',
     ];
 
-    public function task(): HasMany
+    public function tasks(): HasMany
     {
-        return $this->hasMany(tasks::class);
+        return $this->hasMany(tasks::class, 'project_id');
     }
 
     public function team(): BelongsTo

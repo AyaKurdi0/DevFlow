@@ -8,27 +8,27 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewTaskReview extends Notification
+class UnassignTask extends Notification
 {
     use Queueable;
 
-    public $review, $task;
-    public function __construct($review, $task)
+    public $task;
+    public function __construct($task)
     {
-        $this->review = $review;
         $this->task = $task;
     }
 
-    public function via($notifiable): array
+    public function via($notifiable)
     {
         return ['database'];
     }
 
-    public  function toDatabase($notifiable): array
+    public function toDatabase($notifiable): array
     {
         return [
-            'review_id' => $this->review->id,
-            'message' => 'The task "' . $this->task->title . '" has been completed by ' . auth()->user()->name,
+            'title' => "Unsigned task",
+            'content' => "The task {$this->task->title} has been unassigned.",
+            'task_id' => $this->task->id,
         ];
     }
 }

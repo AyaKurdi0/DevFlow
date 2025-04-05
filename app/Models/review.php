@@ -13,9 +13,11 @@ class review extends Model
     protected $table = 'reviews';
 
     protected $fillable = [
+        'title',
         'task_id',
         'leader_id',
-        'status',
+        'developer_id',
+        'reviewStatus',
         'comment',
     ];
 
@@ -24,8 +26,8 @@ class review extends Model
         return $this->belongsTo(tasks::class, 'task_id');
     }
 
-    public function leader(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'leader_id');
-    }
+//    public function leader(): BelongsTo
+//    {
+//        return $this->belongsTo(User::class, 'leader_id');
+//    }
 }

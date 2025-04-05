@@ -27,6 +27,12 @@ class ManageTeamController extends Controller
                 ]);
             }
 
+            if (!($leader->can('create team'))) {
+                return response()->json([
+                    'message' => 'Forbidden access.',
+                ]);
+            }
+
             $team = Team::create([
                 'team_name' => $data['name'],
                 'user_id' => $leader->id,
@@ -45,39 +51,29 @@ class ManageTeamController extends Controller
         }
     }
 
-//    public function updateTeam(Request $request, $id)
-//    {
-//        $data = $request->validate([
-//            'name' => 'required|string',
-//            'Description' => 'nullable|string',
-//
-//        ]);
-//        try {
-//            $leader = Auth::user();
-//            $team = Team::find($id);
-//            $team->update([
-//                'name' => $data['name'],
-//                'Description' => $data['Description'],
-//            ]);
-//            return response()->json([
-//                'message' => 'Team updated successfully',
-//                'team' => $team,
-//            ]);
-//        }
-//        catch (\Exception $e) {
-//            return response()->json([
-//                'message' => 'Unable to update team',
-//                'error' => $e->getMessage(),
-//            ]);
-//        }
-//    }
-
 
     ####################### Delete Team By Leader #######################
-    public function deleteTeam($id): JsonResponse
+    public function deleteTeam(): JsonResponse
     {
+
         try {
-            $team = Team::find($id);
+            $leader = Auth::user();
+            if (!$leader) {
+                return response()->json([
+                    'message' => 'You are not authorized to access this page.',
+                ]);
+            }
+            if (!($leader->can('delete team'))) {
+                return response()->json([
+                    'message' => 'Forbidden access',
+                ]);
+            }
+            $team = $leader->ownedTeam()->first();
+            if (!$team) {
+                return response()->json([
+                    'message' => 'You are not authorized to access this page.',
+                ]);
+            }
             $team->delete();
             return response()->json([
                 'message' => 'Team deleted successfully',

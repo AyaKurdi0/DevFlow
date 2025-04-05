@@ -17,10 +17,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
-            $table->string('github_id')->unique();
-            $table->string('avatar')->nullable();
-            $table->string('github_token')->nullable();
-            $table->string('github_refresh_token')->nullable();
+            $table->string('username');
+            $table->string('email')->nullable();
+            $table->string('token');
+            $table->string('avatar_url')->nullable();
+            $table->json('meta')->nullable();
             $table->timestamps();
         });
     }

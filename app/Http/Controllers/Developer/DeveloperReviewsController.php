@@ -13,7 +13,7 @@ class DeveloperReviewsController extends Controller
 {
 
     ####################### Display All Reviews For Developer #######################
-    public function displayAllReview(): JsonResponse
+    public function displayAllDeveloperReview(): JsonResponse
     {
         try {
             $developer = Auth::user();
@@ -42,7 +42,7 @@ class DeveloperReviewsController extends Controller
 
 
     ####################### Display Approved Reviews For Developer #######################
-    public function displayApprovedReviews(): JsonResponse
+    public function displayApprovedDeveloperReviews(): JsonResponse
     {
         try {
             $developer = Auth::user();
@@ -73,7 +73,7 @@ class DeveloperReviewsController extends Controller
 
 
     ####################### Display Rejected Reviews For Developer #######################
-    public function displayRejectedReviews(): JsonResponse
+    public function displayRejectedDeveloperReviews(): JsonResponse
     {
         try {
             $developer = Auth::user();

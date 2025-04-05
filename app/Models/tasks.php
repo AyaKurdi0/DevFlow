@@ -30,17 +30,17 @@ class tasks extends Model
 
     public function document(): HasMany
     {
-        return $this->hasMany(documents::class);
+        return $this->hasMany(documents::class, 'task_id', 'id');
     }
 
     public function report(): HasMany
     {
-        return $this->hasMany(report::class);
+        return $this->hasMany(report::class, 'task_id', 'id');
     }
 
-    public function user_task(): BelongsToMany
+    public function developers(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'user_task', 'task_id', 'developer_id');
+        return $this->belongsToMany(User::class, 'user_tasks', 'task_id', 'developer_id')->distinct();
     }
 
     public function project(): BelongsTo
