@@ -28,14 +28,11 @@ class GoogleServicesController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
 
-            // ابحث عن حساب Google مرتبط
             $googleAccount = GoogleUser::where('google_id', $googleUser->getId())->first();
 
             if ($googleAccount) {
-                // إذا وجد، استخدم المستخدم المرتبط
                 $user = $googleAccount->user;
             } else {
-                // إذا لم يُوجد، ابحث عن مستخدم بالبريد الإلكتروني أو أنشئه
                 $user = User::where('email', $googleUser->getEmail())->first();
 
                 if (!$user) {
@@ -45,16 +42,14 @@ class GoogleServicesController extends Controller
                     ]);
                 }
 
-                // أنشئ حساب Google مرتبط بالمستخدم
                 $googleAccount = GoogleUser::create([
                     'user_id' => $user->id,
                     'google_id' => $googleUser->getId(),
                     'token' => $googleUser->token,
-                    'data' => json_encode($googleUser->user), // تخزين بيانات إضافية
+                    'data' => json_encode($googleUser->user),
                 ]);
             }
 
-            // أنشئ توكن مصادقة لـ API
             $token = $user->createToken('api-token')->plainTextToken;
 
             return redirect(config('app.frontend_url') . "?token={$token}");
