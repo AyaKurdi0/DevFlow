@@ -10,5 +10,5 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 
 
 Broadcast::channel('team.{teamId}', function ($user, $teamId) {
-    return $user->teams()->where('team_id', $teamId)->exists();
+    return $user->teams()->where('id', $teamId)->exists();
 });

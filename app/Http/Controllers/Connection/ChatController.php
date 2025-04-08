@@ -17,99 +17,78 @@ use Illuminate\Support\Facades\Storage;
 
 class ChatController extends Controller
 {
-    public function sendMessage(Request $request) : JsonResponse
+    ####################### Send Message Between The Team Member #######################
+    public function sendMessage(Request $request): JsonResponse
     {
-        $request->validate([
-            'message' => 'required|string'
-        ]);
+        try {
+            $request->validate([
+                'message' => 'required|string'
+            ]);
+            $team = null;
+            $user = Auth::user();
+            $role = $user->getRoleNames()->first();
 
-        $team = null;
-        $user = Auth::user();
-        $role = $user->getRoleNames()->first();
+            if ($role === 'leader') {
+                $team = $user->ownedTeam;
+                if (!$team) {
+                    return response()->json(['error' => 'Leader does not own any team'], 403);
+                }
+            } else {
+                $team = $user->teams()->first();
+                if (!$team) {
+                    return response()->json(['error' => 'User is not a member of any team'], 403);
+                }
+            }
 
-        if ($role === 'leader') {
-            $team = $user->ownedTeam;
-            if (!$team) {
-                return response()->json(['error' => 'Leader does not own any team'], 403);
-            }
-        } else {
-            $team = $user->teams()->first();
-            if (!$team) {
-                return response()->json(['error' => 'User is not a member of any team'], 403);
-            }
+            $message = Message::create([
+                'team_id' => $team->id,
+                'sender_id' => $user->id,
+                'message' => $request->message
+            ]);
+            $message->load('sender.githubAccount');
+            broadcast(new TeamMessageSent($message))->toOthers();
+            return response()->json(['status' => 'Message sent successfully']);
         }
-
-        $message = Message::create([
-            'team_id' => $team->id,
-            'sender_id' => $user->id,
-            'message' => $request->message
-        ]);
-
-        $user = Auth::user();
-        $userGitHubAccount = $user->githubAccount;
-        $avatarUrl = $userGitHubAccount && $userGitHubAccount->avatar
-            ? asset(Storage::url($userGitHubAccount->avatar))
-            : null;
-
-        broadcast(new TeamMessageSent($team->id, $message, $user))->toOthers();
-
-        return response()->json([
-            'status' => 'Message sent successfully',
-            'message' => [
-                'id' => $message->id,
-                'content' => $message->message,
-                'created_at' => $message->created_at->toDateTimeString(),
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'avatar' => $avatarUrl
-                ]
-            ]
-        ]);
+        catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
-    public function getMessages($teamId) : JsonResponse
-    {
-        $team = Team::findOrFail($teamId);
-        if (!$team->members()->where('users.id', Auth::id())->exists()) {
-            return response()->json(['error' => 'Unauthorized - Not a team member'], 403);
-        }
 
-        $messages = Message::with(['user', 'team'])
-            ->where('team_id', $teamId)
-            ->orderBy('created_at', 'asc')
-            ->get()
-            ->map(function ($message) {
+    ####################### Display Messages History #######################
+    public function getAllMessages(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            $team = $user->ownedTeam ?? $user->teams->first();
+
+            if (!$team) {
+                return response()->json(['error' => 'You are not a member of any team'], 403);
+            }
+            $messages = Message::with('sender.githubAccount')
+                ->where('team_id', $team->id)
+                ->latest()
+                ->get();
+
+            $formattedMessages = $messages->map(function ($message) use ($user) {
                 return [
                     'id' => $message->id,
-                    'content' => $message->message,
+                    'message' => $message->message,
                     'created_at' => $message->created_at->toDateTimeString(),
-                    'user' => [
-                        'id' => $message->user->id,
-                        'name' => $message->user->name,
-                        //'avatar' => $message->user->avatar_url ?? null
+                    'is_sent_by_me' => $message->sender_id === $user->id,
+                    'sender' => [
+                        'id' => $message->sender->id,
+                        'name' => $message->sender->name,
+                        'email' => $message->sender->email,
+                        'github_avatar' => $message->sender_avatar, // من الـ accessor
                     ],
-                    'team' => [
-                        'id' => $message->team->id,
-                        'name' => $message->team->team_name
-                    ]
                 ];
             });
 
-        return response()->json($messages);
-    }
+            return response()->json($formattedMessages);
 
-    public function getTeamMembers($teamId) : JsonResponse
-    {
-        $team = Team::findOrFail($teamId);
-
-        if (!$team->members()->where('users.id', Auth::id())->exists()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Failed to retrieve messages: ' . $e->getMessage()], 500);
         }
-
-        $members = $team->members()->get(['users.id', 'users.name', 'users.email', 'users.avatar_url']);
-
-        return response()->json($members);
     }
-
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\GitHubServicesController;
+use App\Http\Controllers\Auth\GoogleServicesController;
 use App\Http\Controllers\Auth\ManageProfileController;
 use App\Http\Controllers\Connection\ChatController;
 use App\Http\Controllers\Developer\DeveloperReviewsController;
@@ -14,7 +15,6 @@ use App\Http\Controllers\Leader\ManageProjectController;
 use App\Http\Controllers\Leader\ManageReviewsController;
 use App\Http\Controllers\Leader\ManageTasksController;
 use App\Http\Controllers\Leader\ManageTeamController;
-use App\Http\Controllers\Social\GitHubController;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -54,24 +54,24 @@ Route::middleware('auth')->group(function () {
         ->name('verification.send');
 });
 
+Route::prefix('google')->group(function () {
+    Route::get('/',[GoogleServicesController::class, 'redirect'])
+        ->name('google.redirect');
+    Route::get('/callback',[GoogleServicesController::class, 'callback'])
+        ->name('google.callback');
+});
+
 // GitHub Authentication Routes
 Route::prefix('auth/github')->group(function () {
-    Route::get('/', [GitHubController::class, 'redirectToGitHub'])
+    Route::get('/', [GitHubServicesController::class, 'redirect'])
         ->name('github.redirect');
-    Route::get('/callback', [GitHubController::class, 'handleGitHubCallback'])
-        ->name('github.callback');
+    Route::get('/callback', [GitHubServicesController::class, 'callback'])
+        ->name('github.callback')
+        ->middleware('web');
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/status', [GitHubServicesController::class, 'status'])
-            ->name('github.status');
-        Route::delete('/unlink', [GitHubServicesController::class, 'unlink'])
-            ->name('github.unlink');
-        Route::post('/link', [GitHubServicesController::class, 'link'])
-            ->name('github.link');
-        Route::get('/check', [GitHubServicesController::class, 'check'])
-            ->name('github.check');
-        Route::delete('/disconnect', [GitHubServicesController::class, 'disconnect'])
-            ->name('github.disconnect');
+        Route::get('/repository', [GitHubServicesController::class, 'getUserRepositories'])
+            ->name('github.getUserRepositories');
     });
 });
 
@@ -226,10 +226,141 @@ Route::middleware('auth:sanctum')->prefix('user/profile')->group(function () {
         ->name('user.profile.resetPassword');
 });
 
-// Chat Routes
+//Chat Routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/teams/messages', [ChatController::class, 'sendMessage']);
-    Route::get('/teams/{teamId}/messages', [ChatController::class, 'getMessages']);
-    Route::get('/teams/{teamId}/members', [ChatController::class, 'getTeamMembers']);
+    Route::post('/sendMessage', [ChatController::class, 'sendMessage'])
+        ->name('message.send');
+    Route::get('/historyMessages', [ChatController::class, 'getAllMessages'])
+        ->name('history.messages');
 });
 
+//    Route::post('t1', function () {
+//        App\Models\Tasks::create([
+//            'title' => 'Database Schema Optimization',
+//            'type' => 'database',
+//            'description' => 'Optimize database queries and indexes.',
+//            'project_id' => 1,
+//            'due_date' => '2024-01-15',
+//            'start_date' => '2023-12-15',
+//            'estimated_start_date' => '2023-12-15',
+//            'estimated_end_date' => '2023-12-20',
+//            'estimated_time_inDays' => 5,
+//            'actual_time_inDays' => 6,
+//            'status' => 'To Do',
+//            'priority' => 3
+//        ]);
+//
+//        App\Models\Tasks::create([
+//            'title' => 'Frontend UI Design',
+//            'type' => 'front-end',
+//            'description' => 'Create responsive web interface designs.',
+//            'project_id' => 1,
+//            'due_date' => '2023-12-25',
+//            'start_date' => '2023-12-10',
+//            'estimated_start_date' => '2023-12-10',
+//            'estimated_end_date' => '2023-12-20',
+//            'estimated_time_inDays' => 10,
+//            'actual_time_inDays' => 12,
+//            'priority' => 5
+//        ]);
+//
+//        App\Models\Tasks::create([
+//            'title' => 'API Documentation',
+//            'type' => 'back-end',
+//            'description' => 'Document REST API endpoints and usage.',
+//            'project_id' => 1,
+//            'due_date' => '2024-01-05',
+//            'start_date' => '2023-12-20',
+//            'estimated_start_date' => '2023-12-20',
+//            'estimated_end_date' => '2023-12-23',
+//            'estimated_time_inDays' => 3,
+//            'actual_time_inDays' => 4,
+//            'priority' => 1
+//        ]);
+//
+//        App\Models\Tasks::create([
+//            'title' => 'Performance Testing',
+//            'type' => 'back-end',
+//            'description' => 'Conduct load and stress testing.',
+//            'project_id' => 1,
+//            'due_date' => '2024-01-20',
+//            'start_date' => '2024-01-05',
+//            'estimated_start_date' => '2024-01-05',
+//            'estimated_end_date' => '2024-01-12',
+//            'estimated_time_inDays' => 7,
+//            'actual_time_inDays' => 8,
+//            'priority' => 5
+//        ]);
+//
+//        App\Models\Tasks::create([
+//            'title' => 'Bug Fixing Phase 1',
+//            'type' => 'back-end',
+//            'description' => 'Resolve critical bugs reported in v1.0.',
+//            'project_id' => 1,
+//            'due_date' => '2024-01-10',
+//            'start_date' => '2023-12-25',
+//            'estimated_start_date' => '2023-12-25',
+//            'estimated_end_date' => '2023-12-30',
+//            'estimated_time_inDays' => 5,
+//            'actual_time_inDays' => 6,
+//            'priority' => 3
+//        ]);
+//
+//        App\Models\Tasks::create([
+//            'title' => 'Mobile App Integration',
+//            'type' => 'front-end',
+//            'description' => 'Integrate mobile app with backend services.',
+//            'project_id' => 1,
+//            'due_date' => '2024-02-05',
+//            'start_date' => '2024-01-15',
+//            'estimated_start_date' => '2024-01-15',
+//            'estimated_end_date' => '2024-01-29',
+//            'estimated_time_inDays' => 14,
+//            'actual_time_inDays' => 15,
+//            'priority' => 5
+//        ]);
+//
+//        App\Models\Tasks::create([
+//            'title' => 'User Manual Drafting',
+//            'type' => 'front-end',
+//            'description' => 'Write comprehensive user guide.',
+//            'project_id' => 1,
+//            'due_date' => '2024-01-25',
+//            'start_date' => '2024-01-10',
+//            'estimated_start_date' => '2024-01-10',
+//            'estimated_end_date' => '2024-01-17',
+//            'estimated_time_inDays' => 7,
+//            'actual_time_inDays' => 8,
+//            'priority' => 1
+//        ]);
+//
+//        App\Models\Tasks::create([
+//            'title' => 'Security Audit',
+//            'type' => 'back-end',
+//            'description' => 'Perform vulnerability assessment.',
+//            'project_id' => 1,
+//            'due_date' => '2024-02-15',
+//            'start_date' => '2024-02-01',
+//            'estimated_start_date' => '2024-02-01',
+//            'estimated_end_date' => '2024-02-11',
+//            'estimated_time_inDays' => 10,
+//            'actual_time_inDays' => 12,
+//            'priority' => 5
+//        ]);
+//
+//        App\Models\Tasks::create([
+//            'title' => 'Deployment Preparation',
+//            'type' => 'back-end',
+//            'description' => 'Prepare deployment scripts and configurations.',
+//            'project_id' => 1,
+//            'due_date' => '2024-02-20',
+//            'start_date' => '2024-02-10',
+//            'estimated_start_date' => '2024-02-10',
+//            'estimated_end_date' => '2024-02-15',
+//            'estimated_time_inDays' => 5,
+//            'actual_time_inDays' => 6,
+//            'priority' => 3
+//        ]);
+//
+//        return response()->json(['status' => 'success']);
+//    });

@@ -14,36 +14,58 @@ class TeamMessageSent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $teamId;
-    public $messageData;
-    public $userData;
+    public $message;
 
-    public function __construct($teamId, $message, $user)
+    public function __construct($message)
     {
-        $this->teamId = $teamId;
-
-        $this->messageData = [
-            'id' => $message->id,
-            'content' => $message->message,
-            'created_at' => $message->created_at->toDateTimeString(),
-        ];
-
-        $this->userData = [
-            'id' => $user->id,
-            'name' => $user->name,
-            'avatar' => optional($user->githubAccount)->avatar
-                ? asset(Storage::url($user->githubAccount->avatar))
-                : null,
-        ];
+        $this->message = $message;
     }
 
     public function broadcastOn()
     {
-        return new Channel('team.' . $this->teamId);
+        return new PrivateChannel('team.' . $this->message->team_id);
     }
 
-    public function broadcastAs()
+    public function broadcastWith()
     {
-        return 'team.message.sent';
+        $this->message->load('sender.githubAccount');
+
+        return [
+            'id' => $this->message->id,
+            'message' => $this->message->message,
+            'team_id' => $this->message->team_id,
+            'sender_id' => $this->message->sender_id,
+            'created_at' => $this->message->created_at->toDateTimeString(),
+            'is_sent_by_me' => $this->message->is_sent_by_me,
+            'sender_avatar' => $this->message->sender_avatar,
+            'sender' => [
+                'id' => $this->message->sender->id,
+                'name' => $this->message->sender->name,
+                'email' => $this->message->sender->email,
+                'github_avatar' => $this->message->sender->githubAccount?->avatar,
+            ],
+        ];
     }
+
+//    public function broadcastWith()
+//    {
+//        return [
+//            'id' => $this->message->id,
+//            'message' => $this->message->message,
+//            'team_id' => $this->message->team_id,
+//            'sender_id' => $this->message->sender_id,
+//            'created_at' => $this->message->created_at,
+//
+//            'is_sent_by_me' => $this->message->is_sent_by_me,
+//            'sender_avatar' => $this->message->sender_avatar,
+//
+//            'sender' => [
+//                'id' => $this->message->sender->id,
+//                'name' => $this->message->sender->name,
+//                'email' => $this->message->sender->email,
+//            ],
+//        ];
+//    }
+
+
 }
