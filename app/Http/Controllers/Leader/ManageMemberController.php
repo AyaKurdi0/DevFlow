@@ -144,7 +144,7 @@ class ManageMemberController extends Controller
     public function assignPermission(Request $request,$id): JsonResponse
     {
         $data = $request->validate([
-            'permission' => 'required|string|exists:permissions,name',
+            'permission' => 'required|string|in:Manage Projects,Manage Tasks',
         ]);
         try {
             $leader = Auth::user();
@@ -163,17 +163,28 @@ class ManageMemberController extends Controller
 
             $team = Team::where('user_id', $leader->id)->firstOrFail();
 
-            $developer = User::whereHas('team_member', function ($query) use ($team) {
+            $developer = User::whereHas('teams', function ($query) use ($team) {
                 $query->where('team_id', $team->id);
             })->findOrFail($id);
 
-            $permission = Permission::where('name', $data['permission'])->firstOrFail();
-            $developer->givePermissionTo($permission);
+            if ($data['permission'] == 'Manage Projects') {
+                $developer->givePermissionTo('create project');
+                $developer->givePermissionTo('start project');
+                $developer->givePermissionTo('complete project');
+                $developer->givePermissionTo('update project');
+                $developer->givePermissionTo('delete project');
+            }
+
+            if ($data['permission'] == 'Manage Tasks') {
+                $developer->givePermissionTo('create task');
+                $developer->givePermissionTo('assign task');
+                $developer->givePermissionTo('unassign task');
+                $developer->givePermissionTo('delete task');
+                $developer->givePermissionTo('download task files');
+            }
 
             return response()->json([
                 'message' => 'Permission assigned successfully.',
-                'developer' => $developer,
-                'permission' => $permission,
             ],200);
         }
         catch (Exception $e) {
@@ -189,8 +200,9 @@ class ManageMemberController extends Controller
     public function unsignedPermission(Request $request,$id): JsonResponse
     {
         $data = $request->validate([
-            'permission' => 'required|string|exists:permissions,name',
+            'permission' => 'required|string|in:Manage Projects,Manage Tasks',
         ]);
+
         try {
             $leader = Auth::user();
 
@@ -208,24 +220,30 @@ class ManageMemberController extends Controller
 
             $team = Team::where('user_id', $leader->id)->firstOrFail();
 
-            $developer = User::whereHas('team_member', function ($query) use ($team) {
+            $developer = User::whereHas('teams', function ($query) use ($team) {
                 $query->where('team_id', $team->id);
             })->findOrFail($id);
 
-            $permission = Permission::where('name', $data['permission'])->firstOrFail();
 
-            if (!$developer->hasPermissionTo($permission))
-            {
-                return response()->json([
-                    'message' => 'The developer does not have this permission.',
-                ], 400);
+            if ($data['permission'] == 'Manage Projects') {
+                $developer->revokePermissionTo('create project');
+                $developer->revokePermissionTo('start project');
+                $developer->revokePermissionTo('complete project');
+                $developer->revokePermissionTo('update project');
+                $developer->revokePermissionTo('delete project');
             }
 
-            $developer->revokePermissionTo($permission);
+            if ($data['permission'] == 'Manage Tasks') {
+                $developer->revokePermissionTo('create task');
+                $developer->revokePermissionTo('assign task');
+                $developer->revokePermissionTo('unassign task');
+                $developer->revokePermissionTo('delete task');
+                $developer->revokePermissionTo('download task files');
+            }
+
             return response()->json([
                 'message' => 'Permission removed successfully.',
                 'developer' => $developer,
-                'permission' => $permission->name,
             ]);
         }
         catch (Exception $e) {

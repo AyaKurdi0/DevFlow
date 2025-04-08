@@ -15,6 +15,7 @@ class ManageTeamController extends Controller
     public function createTeam(Request $request): JsonResponse
     {
         $data = $request->validate([
+            "manager_name" => "required|string",
             'name' => 'required|string',
         ]);
 
