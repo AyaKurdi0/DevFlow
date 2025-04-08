@@ -81,7 +81,7 @@ Route::middleware('auth:sanctum')->prefix('leader')->group(function () {
     Route::prefix('manageTeam')->group(function () {
         Route::post('/createTeam', [ManageTeamController::class, 'createTeam'])
             ->name('leader.manageTeam.createTeam');
-        Route::post('/deleteTeam', [ManageTeamController::class, 'deleteTeam'])
+        Route::post('/deleteWorkspace', [ManageTeamController::class, 'deleteWorkspace'])
             ->name('leader.manageTeam.deleteTeam');
     });
 

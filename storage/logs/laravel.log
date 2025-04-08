@@ -4303,3 +4303,11 @@ Did you mean one of these?
 #49 C:\\Users\\Aya\\Desktop\\Dev\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\resources\\server.php(16): require_once('C:\\\\Users\\\\Aya\\\\De...')
 #50 {main}
 "} 
+[2025-04-08 13:20:08] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at C:\\Users\\Aya\\Desktop\\Dev\\vendor\\laravel\\framework\\src\\Illuminate\\Database\\Connection.php:414)
+[stacktrace]
+#0 C:\\Users\\Aya\\Desktop\\Dev\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\HandleExceptions.php(261): Symfony\\Component\\ErrorHandler\\Error\\FatalError->__construct(message: ''Maximum execut...', code: '0', error: '['type' => 1, '...', traceOffset: '0', traceArgs: '???', trace: '???')
+#1 C:\\Users\\Aya\\Desktop\\Dev\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\HandleExceptions.php(248): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->fatalErrorFromPhpError(error: '['type' => 1, '...', traceOffset: '0')
+#2 C:\\Users\\Aya\\Desktop\\Dev\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\HandleExceptions.php(272): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleShutdown()
+#3 C:\\Users\\Aya\\Desktop\\Dev\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\HandleExceptions.php(0): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->Illuminate\\Foundation\\Bootstrap\\{closure:C:\\Users\\Aya\\Desktop\\Dev\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\Bootstrap\\HandleExceptions.php:271-273}()
+#4 {main}
+"} 

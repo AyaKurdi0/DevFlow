@@ -14,6 +14,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ManageTasksController extends Controller
 {
@@ -68,46 +69,54 @@ class ManageTasksController extends Controller
 
 
     ####################### Delete Task By Leader #######################
-    public function deleteTask($taskId) :JsonResponse
+
+    public function deleteTask($taskId): JsonResponse
     {
         try {
             $leader = Auth::user();
 
-            if (!$leader)
-            {
+            if (!$leader) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            if (!($leader->can('delete task')))
-            {
+            if (!$leader->can('delete task')) {
                 return response()->json([
-                    'massage' => 'Forbidden access.'
-                ]);
+                    'message' => 'Forbidden access.'
+                ], 403);
             }
 
-            $task = tasks::findOrFail($taskId);
-            $userTasks = user_task::where('task_id', $taskId)->get();
-            foreach ($userTasks as $userTask) {
-                $userTask->delete();
+            $task = tasks::with([
+                'project',
+                'report',
+                'reviews',
+                'document',
+                'developers'
+            ])->findOrFail($taskId);
+
+            if ($task->project->leader_id !== $leader->id) {
+                return response()->json([
+                    'message' => 'You do not have permission to delete this task.',
+                ], 403);
             }
 
-            $taskReviews = review::where('task_id', $taskId)->get();
-            foreach ($taskReviews as $taskReview) {
-                $taskReview->delete();
-            }
+            DB::transaction(function () use ($task) {
+                $task->report()->delete();
+                $task->reviews()->delete();
+                $task->document()->delete();
+                $task->developers()->detach();
 
-            $task->delete();
-
+                $task->delete();
+            });
 
             return response()->json([
-                'message' => 'Task deleted successfully'
-            ]);
-        }
-        catch (Exception $exception)
-        {
+                'message' => 'Task and all related data deleted successfully.',
+            ], 200);
+
+        } catch (Exception $exception) {
             return response()->json([
-                'message' => $exception->getMessage()
-            ]);
+                'message' => 'Unable to delete task.',
+                'error' => $exception->getMessage()
+            ], 500);
         }
     }
 

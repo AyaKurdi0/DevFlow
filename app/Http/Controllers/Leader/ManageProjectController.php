@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 
 class ManageProjectController extends Controller
@@ -70,33 +71,45 @@ class ManageProjectController extends Controller
         try {
             $leader = Auth::user();
 
-            if (!$leader)
-            {
+            if (!$leader) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            if (!($leader->can('delete project')))
-            {
+            if (!$leader->can('delete project')) {
                 return response()->json([
-                    'massage' => 'Forbidden access.'
-                ]);
+                    'message' => 'Forbidden access.'
+                ], 403);
             }
 
-            $project = projects::findOrFail($projectId);
-            $tasks = $project->tasks()->get();
+            $project = projects::with([
+                'tasks.report',
+                'tasks.reviews',
+                'tasks.document',
+                'tasks.developers',
+                'tasks',
+            ])->findOrFail($projectId);
 
-            foreach ($tasks as $task) {
-                $task->delete();
-            }
-            $project->delete();
+            DB::transaction(function () use ($project) {
+                foreach ($project->tasks as $task) {
+                    $task->report()->delete();
+                    $task->reviews()->delete();
+                    $task->document()->delete();
+                    $task->developers()->detach();
+                }
+
+                $project->tasks()->delete();
+                $project->delete();
+            });
+
             return response()->json([
-                'message' => 'Project deleted successfully',
-            ]);
-        }
-        catch (Exception $e) {
+                'message' => 'Project and all related data deleted successfully.',
+            ], 200);
+
+        } catch (Exception $e) {
             return response()->json([
-                'message' => $e->getMessage(),
-            ]);
+                'message' => 'Unable to delete project.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
