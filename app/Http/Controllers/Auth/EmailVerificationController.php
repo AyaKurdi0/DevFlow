@@ -9,18 +9,16 @@ class EmailVerificationController extends Controller
 {
 
     ####################### Email Need To Being Verified #######################
-    public function notice()
+    public function notice(Request $request)
     {
-        try {
-            return response()->json([
-                'message' => 'Please verify your email address.'
-            ], 403);
+        if ($request->user()->hasVerifiedEmail()) {
+            return response()->json(['verified' => true], 200);
         }
-        catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 500);
-        }
+
+        return response()->json([
+            'message' => 'Email verification required',
+            'verified' => false
+        ], 403);
     }
 
 
